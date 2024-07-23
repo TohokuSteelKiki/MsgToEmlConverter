@@ -19,6 +19,7 @@ msg_folder = input("MSGファイルが格納されているフォルダを入力
 # フォルダの存在確認
 if not os.path.isdir(msg_folder):
     print("指定されたフォルダが存在しません。プログラムを終了します。")
+    input("Enterキーを押して終了してください...")
     exit()
 
 tmp_folder = os.path.join(msg_folder, 'tmp')
@@ -31,17 +32,34 @@ os.makedirs(eml_folder, exist_ok=True)
 # タイトルに日付を追加するか確認
 add_date_to_title = input("タイトルにメール受信日時を追加しますか？（y/n）: ").strip().lower()
 
+# 変換済みファイルのリストを保存するファイルパス
+converted_files_list_path = os.path.join(eml_folder, 'converted_files.txt')
+
+# 既に変換済みのファイルをリストから読み込む
+if os.path.exists(converted_files_list_path):
+    with open(converted_files_list_path, 'r') as file:
+        converted_files = set(file.read().splitlines())
+else:
+    converted_files = set()
+
 # MSGフォルダ内のすべてのMSGファイルを取得
 msg_files = [f for f in os.listdir(msg_folder) if f.endswith('.msg')]
 total_files = len(msg_files)
 
 # 変換されたファイル数をカウント
 converted_count = 0
+# スキップされたファイル数をカウント
+skipped_count = 0
 
 # エラーログファイルの設定
 error_log_path = os.path.join(msg_folder, 'error.log')
 
 for msg_file in msg_files:
+    if msg_file in converted_files:
+        skipped_count += 1
+        print(f"スキップ: {msg_file}（既に変換済み）")
+        continue
+
     try:
         # MSGファイルの読み込み
         msg_path = os.path.join(msg_folder, msg_file)
@@ -49,6 +67,7 @@ for msg_file in msg_files:
 
         # メッセージ部分の情報取得
         subject = sanitize_filename(msg.subject)
+        # subject = msg.subject # バグチェック用
         sender = msg.sender
         date = msg.date.strftime('%Y%m%d%H%M%S')  # 日付を文字列に変換
 
@@ -93,6 +112,9 @@ for msg_file in msg_files:
         with open(eml_file_path, 'wb') as eml_file:
             eml_file.write(eml_msg.as_bytes(policy=default))
 
+        # 変換されたファイルをリストに追加
+        converted_files.add(msg_file)
+
         # 一時フォルダ内の添付ファイルを削除
         for file in os.listdir(tmp_folder):
             os.remove(os.path.join(tmp_folder, file))
@@ -106,5 +128,22 @@ for msg_file in msg_files:
     except Exception as e:
         with open(error_log_path, 'a') as error_log:
             error_log.write(f"ファイル {msg_file} の変換中にエラーが発生しました: {e}\n")
+        # 詳細なエラーログ
+        with open(error_log_path, 'a', encoding='utf-8') as error_log:
+            import traceback
+            error_log.write(f"詳細エラートレースバック: {traceback.format_exc()}\n")
 
-print(f"全てのMSGファイルがEMLに変換されました。変換されたファイル数: {converted_count}/{total_files}")
+# 変換済みファイルのリストを保存
+with open(converted_files_list_path, 'w') as file:
+    for converted_file in converted_files:
+        file.write(f"{converted_file}\n")
+
+print(f"全てのMSGファイルがEMLに変換されました。変換されたファイル数: {converted_count}/{total_files-skipped_count}")
+print(f"スキップされたファイル数: {skipped_count}")
+
+# エラーログの内容をユーザーに通知
+if os.path.exists(error_log_path):
+    print(f"エラーログファイルが {error_log_path} に作成されました。詳細はログファイルを確認してください。")
+
+# 終了前にユーザー入力を待つ
+input("Enterキーを押して終了してください...")
