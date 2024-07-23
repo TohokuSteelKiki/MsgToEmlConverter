@@ -15,6 +15,22 @@ the program offers an option to prefix the email subject with the received date 
 - Temporary File Management: Manages temporary files during conversion and cleans up after the process.
 
 ### Usage
+#### Using the Executable
+To use the pre-built executable, download `msg_eml_converter.exe` from the [latest release](https://github.com/TohokuSteelKiki/MsgToEmlConverter/releases/latest) and run it. Follow the prompts to convert your MSG files to EML.
+
+#### Creating the Executable using PyInstaller
+If you prefer to create the executable yourself, follow these steps:
+1. Install PyInstaller:
+   ~~~sh
+   pip install pyinstaller
+   ~~~
+2. Navigate to the directory containing the `msg_eml_converter.py` file and run PyInstaller:
+   ~~~sh
+   pyinstaller --onefile msg_eml_converter.py
+   ~~~
+3. The executable will be created in the `dist` directory.
+
+#### Running the Program from Source
 1. Add Remote Repository:
    ~~~sh
    git remote add origin https://github.com/TohokuSteelKiki/MsgToEmlConverter.git
@@ -52,6 +68,22 @@ This project is licensed under the MIT License.
 - 一時ファイル管理: 変換中に一時ファイルを管理し、プロセス終了後にクリーンアップします。
 
 ### 使用方法
+#### 実行可能ファイルの使用
+事前にビルドされた実行可能ファイルを使用するには、[最新のリリース](https://github.com/TohokuSteelKiki/MsgToEmlConverter/releases/latest)から`msg_eml_converter.exe`をダウンロードして実行します。プロンプトに従ってMSGファイルをEMLに変換します。
+
+#### PyInstallerを使用して実行可能ファイルを作成する
+自分で実行可能ファイルを作成する場合、以下の手順に従ってください:
+1. PyInstallerをインストールします:
+   ~~~sh
+   pip install pyinstaller
+   ~~~
+2. `msg_eml_converter.py`ファイルが含まれているディレクトリに移動し、PyInstallerを実行します:
+   ~~~sh
+   pyinstaller --onefile msg_eml_converter.py
+   ~~~
+3. 実行可能ファイルは`dist`ディレクトリに作成されます。
+
+#### ソースからプログラムを実行する
 1. リモートリポジトリの追加:
    ~~~sh
    git remote add origin https://github.com/TohokuSteelKiki/MsgToEmlConverter.git
