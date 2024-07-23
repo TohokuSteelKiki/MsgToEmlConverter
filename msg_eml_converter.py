@@ -59,6 +59,7 @@ skipped_count = 0
 
 # エラーログファイルの設定
 error_log_path = os.path.join(msg_folder, 'error.log')
+detailed_error_log_path = os.path.join(msg_folder, 'detailed_error.log')
 
 for msg_file in msg_files:
     if msg_file in converted_files:
@@ -130,7 +131,7 @@ for msg_file in msg_files:
                 os.remove(os.path.join(tmp_folder, file))
             except PermissionError as e:
                 print(f"ファイル {file} の削除中にエラーが発生しました: {e}")
-                with open(error_log_path, 'a', encoding='utf-8') as error_log:
+                with open(detailed_error_log_path, 'a', encoding='utf-8') as error_log:
                     error_log.write(f"ファイル {msg_file} の変換中にエラーが発生しました: {e}\n")
 
         # 削除が完了したことを確認
@@ -146,9 +147,10 @@ for msg_file in msg_files:
     except Exception as e:
         with open(error_log_path, 'a', encoding='utf-8') as error_log:
             error_log.write(f"ファイル {msg_file} の変換中にエラーが発生しました: {e}\n")
-            # 詳細なエラーログ
+        # 詳細なエラーログ
+        with open(detailed_error_log_path, 'a', encoding='utf-8') as error_log:
             import traceback
-            error_log.write(f"詳細エラートレースバック: {traceback.format_exc()}\n")
+            error_log.write(f"ファイル {msg_file} の変換中に詳細エラートレースバック: {traceback.format_exc()}\n")
 
 # 変換済みファイルのリストを保存
 with open(converted_files_list_path, 'w', encoding='utf-8') as file:
@@ -161,6 +163,8 @@ print(f"スキップされたファイル数: {skipped_count}")
 # エラーログの内容をユーザーに通知
 if os.path.exists(error_log_path):
     print(f"エラーログファイルが {error_log_path} に作成されました。詳細はログファイルを確認してください。")
+if os.path.exists(detailed_error_log_path):
+    print(f"詳細エラーログファイルが {detailed_error_log_path} に作成されました。詳細はログファイルを確認してください。")
 
 # 終了前にユーザー入力を待つ
 input("Enterキーを押して終了してください...")
