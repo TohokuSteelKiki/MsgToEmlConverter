@@ -121,8 +121,13 @@ for msg_file in msg_files:
 
         # 一時フォルダ内の添付ファイルを削除
         for file in os.listdir(tmp_folder):
-            os.remove(os.path.join(tmp_folder, file))
-        
+            try:
+                os.remove(os.path.join(tmp_folder, file))
+            except PermissionError as e:
+                print(f"ファイル {file} の削除中にエラーが発生しました: {e}")
+                with open(error_log_path, 'a', encoding='utf-8') as error_log:
+                    error_log.write(f"ファイル {msg_file} の変換中にエラーが発生しました: {e}\n")
+
         # 削除が完了したことを確認
         while os.listdir(tmp_folder):
             time.sleep(0.1)
@@ -134,15 +139,14 @@ for msg_file in msg_files:
         print(f"変換中: {converted_count}/{total_files} - {msg_file}")
 
     except Exception as e:
-        with open(error_log_path, 'a') as error_log:
-            error_log.write(f"ファイル {msg_file} の変換中にエラーが発生しました: {e}\n")
-        # 詳細なエラーログ
         with open(error_log_path, 'a', encoding='utf-8') as error_log:
+            error_log.write(f"ファイル {msg_file} の変換中にエラーが発生しました: {e}\n")
+            # 詳細なエラーログ
             import traceback
             error_log.write(f"詳細エラートレースバック: {traceback.format_exc()}\n")
 
 # 変換済みファイルのリストを保存
-with open(converted_files_list_path, 'w') as file:
+with open(converted_files_list_path, 'w', encoding='utf-8') as file:
     for converted_file in converted_files:
         file.write(f"{converted_file}\n")
 
