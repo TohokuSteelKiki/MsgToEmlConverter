@@ -38,7 +38,7 @@ converted_files_list_path = os.path.join(eml_folder, 'converted_files.txt')
 
 # 既に変換済みのファイルをリストから読み込む
 if os.path.exists(converted_files_list_path):
-    with open(converted_files_list_path, 'r') as file:
+    with open(converted_files_list_path, 'r', encoding='utf-8') as file:
         converted_files = set(file.read().splitlines())
 else:
     converted_files = set()
@@ -46,6 +46,11 @@ else:
 # MSGフォルダ内のすべてのMSGファイルを取得
 msg_files = [f for f in os.listdir(msg_folder) if f.endswith('.msg')]
 total_files = len(msg_files)
+
+if total_files == 0:
+    print("変換するMSGファイルが見つかりません。プログラムを終了します。")
+    input("Enterキーを押して終了してください...")
+    exit()
 
 # 変換されたファイル数をカウント
 converted_count = 0
