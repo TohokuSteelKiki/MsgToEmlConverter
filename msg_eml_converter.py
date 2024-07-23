@@ -2,6 +2,7 @@ import extract_msg
 import os
 import shutil
 import re
+import time
 from email.message import EmailMessage
 from email.policy import default
 from email import encoders
@@ -67,7 +68,6 @@ for msg_file in msg_files:
 
         # メッセージ部分の情報取得
         subject = sanitize_filename(msg.subject)
-        # subject = msg.subject # バグチェック用
         sender = msg.sender
         date = msg.date.strftime('%Y%m%d%H%M%S')  # 日付を文字列に変換
 
@@ -95,7 +95,11 @@ for msg_file in msg_files:
         for attachment in msg.attachments:
             attachment.save(customPath=tmp_folder)
             file_path = os.path.join(tmp_folder, attachment.longFilename)
-            
+
+            # 添付ファイルが存在することを確認
+            while not os.path.exists(file_path):
+                time.sleep(0.1)
+
             # 添付ファイルをEMLに追加
             with open(file_path, 'rb') as f:
                 mime_part = MIMEBase('application', 'octet-stream')
@@ -118,6 +122,10 @@ for msg_file in msg_files:
         # 一時フォルダ内の添付ファイルを削除
         for file in os.listdir(tmp_folder):
             os.remove(os.path.join(tmp_folder, file))
+        
+        # 削除が完了したことを確認
+        while os.listdir(tmp_folder):
+            time.sleep(0.1)
 
         # 変換されたファイルのカウントを増加
         converted_count += 1
@@ -138,7 +146,7 @@ with open(converted_files_list_path, 'w') as file:
     for converted_file in converted_files:
         file.write(f"{converted_file}\n")
 
-print(f"全てのMSGファイルがEMLに変換されました。変換されたファイル数: {converted_count}/{total_files-skipped_count}")
+print(f"全てのMSGファイルがEMLに変換されました。変換されたファイル数: {converted_count}/{total_files - skipped_count}")
 print(f"スキップされたファイル数: {skipped_count}")
 
 # エラーログの内容をユーザーに通知
